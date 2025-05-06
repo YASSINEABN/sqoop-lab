@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hadoop Data Visualization</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+        }
+        .chart-container {
+            margin-bottom: 30px;
+        }
+        .chart-img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Employee Data Visualization</h1>
+        
+        {% if data_available %}
+            <div class="row mb-5">
+                {% for chart_title, chart_data in charts %}
+                <div class="col-md-6 chart-container">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>{{ chart_title }}</h3>
+                        </div>
+                        <div class="card-body">
+                            <img src="data:image/png;base64,{{ chart_data }}" class="chart-img" alt="{{ chart_title }}">
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <h2 class="mb-3">Employee Data</h2>
+            <div class="table-responsive">
+                {{ data_html|safe }}
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                <h4 class="alert-heading">Data Not Available</h4>
+                <p>{{ error_message }}</p>
+                <hr>
+                <p class="mb-0">
+                    {% if conversion_successful %}
+                        Data import started but no data is available yet. Please check back later.
+                    {% else %}
+                        There was a problem converting the data from MySQL to Hadoop.
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

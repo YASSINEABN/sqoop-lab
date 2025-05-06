@@ -1,0 +1,70 @@
+version: "3.9"
+
+services:
+  # Hadoop service
+  hadoop:
+    build:
+      context: ./hadoop
+      dockerfile: Dockerfile
+    container_name: hadoop-master
+    hostname: hadoop-master
+    ports:
+      - "9000:9000"  # Hadoop HDFS
+      - "9870:9870"  # Hadoop NameNode web UI
+      - "8088:8088"  # YARN ResourceManager web UI
+    volumes:
+      - hadoop-data:/hadoop-data
+    networks:
+      - sqoop-net
+
+  # Sqoop service with MySQL connector
+  sqoop:
+    build:
+      context: ./sqoop
+      dockerfile: Dockerfile
+    container_name: sqoop
+    depends_on:
+      - hadoop
+      - mysql
+    volumes:
+      - ./data:/data
+      - hadoop-data:/hadoop-data
+    networks:
+      - sqoop-net
+
+  # MySQL service with sample database
+  mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    container_name: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - sqoop-net
+
+  # Data visualization service (simple web app)
+  webapp:
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile
+    container_name: data-viewer
+    ports:
+      - "8080:80"
+    depends_on:
+      - hadoop
+    volumes:
+      - hadoop-data:/hadoop-data:ro
+    networks:
+      - sqoop-net
+
+networks:
+  sqoop-net:
+    driver: bridge
+
+volumes:
+  hadoop-data:
+  mysql-data:
